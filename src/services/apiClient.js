@@ -14,21 +14,17 @@ export async function getProducts() {
   return handleResponse(response);
 }
 
-export async function fetchCart() {
-  // This is a placeholder. In a real app, you'd pass a user ID.
-  const userId = 'test-user'; 
-  const response = await fetch(`${API_URL}/api/cart/${userId}`);
+export async function fetchCart(cartId) {
+  const response = await fetch(`${API_URL}/api/cart/${cartId}`);
   const cart = await handleResponse(response);
   return cart.items || []; // The API returns a cart object with an 'items' array
 }
 
-export async function addToCart(item) {
-  // This is a placeholder. In a real app, you'd pass a user ID.
-  const userId = 'test-user';
-  const response = await fetch(`${API_URL}/api/cart/${userId}/items`, {
+export async function addToCart(item, cartId) {
+  const response = await fetch(`${API_URL}/api/cart/${cartId}/items`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ ...item, userId }),
+    body: JSON.stringify(item),
   });
   return handleResponse(response);
 }
