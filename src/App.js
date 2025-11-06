@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 
 function App() {
-  const [products, setProducts] = useState([]);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('/api/products')
-      .then(response => {
     const fetchCatalog = async () => {
       try {
         // Here is where the environment variable is used to construct the full URL.
@@ -20,17 +17,8 @@ function App() {
         const response = await fetch(apiUrl);
 
         if (!response.ok) {
-          throw new Error('Network response was not ok');
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
-        return response.json();
-      })
-      .then(data => setProducts(data))
-      .catch(error => {
-        console.error('There was a problem with your fetch operation:', error);
-        setError(error.message);
-      });
-  }, []);
 
         const data = await response.json();
         setItems(data);
@@ -49,18 +37,6 @@ function App() {
 
   return (
     <div>
-      <h1>Retail Demo Frontend</h1>
-      <h2>Products</h2>
-      {error && <p>Error fetching products: {error}</p>}
-      {products.length > 0 ? (
-        <ul>
-          {products.map((product) => (
-            <li key={product.id}>{product.name} - ${product.price}</li>
-          ))}
-        </ul>
-      ) : (
-        !error && <p>Loading products...</p>
-      )}
       <h1>Catalog Items</h1>
       <ul>
         {items.map((item) => (
