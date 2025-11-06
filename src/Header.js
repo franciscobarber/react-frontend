@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { useCart } from './components/CartContext';
 
 export default function Header() {
-  const { cart } = useCart();
-  const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+  const { cartItems } = useCart();
+  const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <header>
