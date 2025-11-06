@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
 async function fetchCatalog() {
-  // The backend endpoint is at /api/catalog
-  const response = await fetch('/api/catalog');
+  // Use the environment variable for the full URL.
+  // With the proxy in package.json, a relative URL like '/api/catalog7' would also work.
+  const apiUrl = `${process.env.REACT_APP_API_URL}/api/catalog`;
+  const response = await fetch(apiUrl);
   if (!response.ok) {
     // This will be caught by the .catch() block
     throw new Error(`HTTP error! status: ${response.status}`);
