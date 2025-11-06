@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { CartProvider } from './components/CartContext';
 import Header from './Header';
 import ProductCatalog from './components/Catalog.jsx';
 import Cart from './components/Cart';
