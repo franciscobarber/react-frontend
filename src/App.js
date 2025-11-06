@@ -1,11 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Header from './Header';
-import { CartProvider } from './context/CartContext';
+import { CartProvider } from './components/CartContext';
 import ProductCatalog from './components/Catalog.jsx';
-import Cart from './Cart';
-import Checkout from './Checkout';
-import Recommendations from './Recommendations';
+import Cart from './components/Cart';
+import Checkout from './components/Checkout';
+import Recommendations from './components/Recommendations';
 
 function App() {
   return (
