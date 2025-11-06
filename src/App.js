@@ -10,7 +10,7 @@ function App() {
       try {
         // Here is where the environment variable is used to construct the full URL.
         // It combines the base URL from your .env file with the specific API endpoint.
-        const apiUrl = `${process.env.REACT_APP_API_URL}/api/catalog7`;
+        const apiUrl = `${process.env.REACT_APP_API_URL}/api/catalog`;
 
         console.log(`Fetching data from: ${apiUrl}`);
 
