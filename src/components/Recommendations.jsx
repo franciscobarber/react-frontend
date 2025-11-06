@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import * as api from '../services/api';
+import { getProducts } from '../services/apiClient';
 
 const Recommendations = () => {
     const [recommendations, setRecommendations] = useState([]);
@@ -7,8 +7,9 @@ const Recommendations = () => {
     useEffect(() => {
         const fetchRecommendations = async () => {
             try {
-                const data = await api.getRecommendations();
-                setRecommendations(data);
+                const products = await getProducts();
+                // Let's just recommend the first 3 products for simplicity
+                setRecommendations(products.slice(0, 3));
             } catch (error) {
                 console.error("Failed to fetch recommendations:", error);
             }

@@ -1,17 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { useCart } from '../context/CartContext'; // Assuming CartContext is in ../context
-
-async function fetchCatalog() {
-  // Use the environment variable for the full URL.
-  // With the proxy in package.json, a relative URL like '/api/catalog7' would also work.
-  const apiUrl = `${process.env.REACT_APP_API_URL}/api/catalog`;
-  const response = await fetch(apiUrl);
-  if (!response.ok) {
-    // This will be caught by the .catch() block
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return response.json();
-}
+import { useCart } from '../components/CartContext';
+import { getProducts } from '../services/apiClient';
 
 export default function Catalog() {
   const [products, setProducts] = useState([]);
@@ -20,7 +9,7 @@ export default function Catalog() {
   const { addToCart } = useCart();
 
   useEffect(() => {
-    fetchCatalog()
+    getProducts()
       .then(setProducts)
       .catch(err => {
         console.error("Error fetching catalog:", err);

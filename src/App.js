@@ -5,6 +5,7 @@ import ProductCatalog from './components/Catalog.jsx';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Recommendations from './components/Recommendations';
+import { CartProvider } from './components/CartContext';
 
 function App() {
   return (

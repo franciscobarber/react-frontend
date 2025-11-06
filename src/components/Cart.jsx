@@ -1,22 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import { fetchCart, addToCart } from '../../../frontend/services/apiClient';
+import React from 'react';
+import { useCart } from '../components/CartContext';
 
 export default function Cart() {
-  const [cartItems, setCartItems] = useState([]);
-
-  useEffect(() => {
-    fetchCart().then(setCartItems);
-  }, []);
-
-  const handleAdd = () => {
-    const newItem = { productName: 'Laptop', quantity: 1 };
-    addToCart(newItem).then(() => fetchCart().then(setCartItems));
-  };
+  const { cartItems } = useCart();
 
   return (
     <div>
       <h2>Shopping Cart</h2>
-      <button onClick={handleAdd}>Add Laptop</button>
+      {cartItems.length === 0 && <p>Your cart is empty.</p>}
       <ul>
         {cartItems.map(c => (
           <li key={c.id}>{c.productName} - Qty: {c.quantity}</li>
