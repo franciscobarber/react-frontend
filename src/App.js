@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import { CartProvider } from './context/CartContext';
+import { CartProvider } from './components/CartContext';
 import Header from './Header';
-import ProductCatalog from './components/Catalog';
+import ProductCatalog from './components/Catalog.jsx';
 import Cart from './Cart';
 import Checkout from './Checkout';
 import Recommendations from './Recommendations';

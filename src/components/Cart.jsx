@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { fetchCart, addToCart } from '../../frontend/services/apiClient';
+import { fetchCart, addToCart } from '../../../frontend/services/apiClient';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
