@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useCart } from '../context/CartContext'; // Assuming CartContext is in ../context
 
 async function fetchCatalog() {
   // Use the environment variable for the full URL.
@@ -16,6 +17,7 @@ export default function Catalog() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { addToCart } = useCart();
 
   useEffect(() => {
     fetchCatalog()
@@ -34,7 +36,12 @@ export default function Catalog() {
     <div>
       <h2>Catalog</h2>
       <ul>
-        {products.map(p => <li key={p.id}>{p.name} - ${p.price}</li>)}
+        {products.map(p => (
+          <li key={p.id}>
+            {p.name} - ${p.price}
+            <button onClick={() => addToCart(p.id, 1)}>Add to Cart</button>
+          </li>
+        ))}
       </ul>
     </div>
   );
