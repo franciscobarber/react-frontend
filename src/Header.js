@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from './components/CartContext';
+import Auth from './components/Auth';
 
 export default function Header() {
   const { cartItems } = useCart();
@@ -17,6 +18,7 @@ export default function Header() {
             </Link>
           </li>
           <li><Link to="/checkout">Checkout</Link></li>
+          <li><Auth /></li>
         </ul>
       </nav>
     </header>
