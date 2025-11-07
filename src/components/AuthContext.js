@@ -59,66 +59,41 @@ export const AuthProvider = ({ children }) => {
   const [backendAccessToken, setBackendAccessToken] = useState(null); // This will hold the AAD token for your backend
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Overall authentication status
 
-  // This effect will run once on mount and set up the event callback
-  useEffect(() => {
-    const callbackId = msalInstance.addEventCallback(async (event) => {
-      if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
-        console.log("MSAL LOGIN_SUCCESS event received.");
-        const account = event.payload.account;
-        msalInstance.setActiveAccount(account);
-
-        try {
-          const tokenResponse = await msalInstance.acquireTokenSilent({
-            ...backendApiRequest,
-            account: account,
-          });
-          console.log("Backend access token acquired after LOGIN_SUCCESS.");
-          setBackendAccessToken(tokenResponse.accessToken);
-          setIsAuthenticated(true);
-          // The userInfo from SWA might be stale or not what we want for display.
-          // Let's create a user object from the MSAL account info.
-          setUserInfo({ userDetails: account.name || account.username });
-        } catch (error) {
-          console.error("Error acquiring token after login:", error);
-          // Handle token acquisition failure, e.g., by initiating an interactive request
-        }
-      }
-    });
-
-    return () => msalInstance.removeEventCallback(callbackId);
-  }, []);
-
   useEffect(() => {
     async function initializeAuth() {
       try {
-        // 1. Handle MSAL redirect (if any) - important for redirect flows
-        await msalInstance.handleRedirectPromise();
+        // Handle the redirect promise. This will return a result if the page is loaded after a redirect, otherwise null.
+        const redirectResult = await msalInstance.handleRedirectPromise();
         console.log("MSAL handleRedirectPromise completed.");
 
-        // 2. Get SWA client principal (for general user info display, if SWA is still used for initial login)
-        const accounts = msalInstance.getAllAccounts();
-        if (accounts.length > 0) {
-          msalInstance.setActiveAccount(accounts[0]);
+        // Determine the active account. Prioritize the account from the redirect result.
+        const account = redirectResult?.account || msalInstance.getAllAccounts()[0];
+
+        if (account) {
+          msalInstance.setActiveAccount(account);
           setIsAuthenticated(true);
-          setUserInfo({ userDetails: accounts[0].name || accounts[0].username });
-          console.log("Accounts found after redirect. User authenticated:", accounts[0].name || accounts[0].username);
+          setUserInfo({ userDetails: account.name || account.username });
+          console.log("User authenticated:", account.name || account.username);
+
           try {
+            // Silently acquire a token for the backend API.
             const tokenResponse = await msalInstance.acquireTokenSilent({
               ...backendApiRequest,
-              account: accounts[0],
+              account: account,
             });
             setBackendAccessToken(tokenResponse.accessToken);
+            console.log("Backend access token acquired successfully on load.");
           } catch (error) {
             if (error instanceof InteractionRequiredAuthError) {
               console.warn("Silent token acquisition failed. User interaction is required.");
-              // Optionally, you could trigger msalInstance.loginRedirect(backendApiRequest) here
+              // This is a good place to initiate an interactive request if needed.
+              // Example: msalInstance.acquireTokenRedirect(backendApiRequest);
             } else {
               console.error("Error acquiring token silently on page load:", error);
             }
           }
         } else {
-          console.log("No MSAL accounts found after redirect processing.");
-          // No accounts are signed in
+          console.log("No active MSAL account found.");
           setUserInfo(null);
           setIsAuthenticated(false);
           setBackendAccessToken(null);
@@ -126,7 +101,7 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error during authentication initialization:', error);
       } finally {
-        console.log("Auth initialization finished. isAuthenticated:", isAuthenticated);
+        console.log("Auth initialization finished.");
         setIsLoading(false);
       }
     }
