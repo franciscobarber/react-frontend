@@ -23,7 +23,11 @@ export function CartProvider({ children }) {
     const refreshCart = useCallback(async () => {
         try {
             const items = await fetchCart(cartId);
-            setCartItems(items);
+            // Ensure cartItems is always an array.
+            // If the API returns an object like { items: [...] } for a cart, extract the array.
+            // If it returns an empty object {} for an empty cart, default to an empty array.
+            const itemsArray = Array.isArray(items) ? items : (items && items.items) || [];
+            setCartItems(itemsArray);
         } catch (error) {
             console.error("Failed to fetch cart:", error);
             // Handle error appropriately in a real app
