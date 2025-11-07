@@ -8,8 +8,8 @@ const AuthContext = createContext(null);
 // It's highly recommended to use environment variables for these values.
 const msalConfig = {
   auth: {
-    clientId: process.env.REACT_APP_AAD_CLIENT_ID || '500400f3-0551-468b-b59c-1bddd6e055b1', // **VERIFY THIS ID EXISTS IN AZURE AD PORTAL**
-    authority: process.env.REACT_APP_AAD_AUTHORITY || 'https://login.microsoftonline.com/organizations', // Use 'organizations' for multi-tenant work/school accounts
+    clientId: process.env.REACT_APP_AAD_CLIENT_ID || '500400f3-0551-468b-b59c-1bddd6e055b1', // Application (client) ID of your frontend app registration in Azure AD
+    authority: process.env.REACT_APP_AAD_AUTHORITY || 'https://login.microsoftonline.com/common', // Use 'common' for multi-tenant work/school accounts AND personal Microsoft accounts
     redirectUri: window.location.origin, // Your frontend's redirect URI (e.g., http://localhost:3000)
   },
   cache: {
