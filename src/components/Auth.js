@@ -1,6 +1,5 @@
 import React from 'react';
 import { useAuth } from './AuthContext';
-import { InteractionType } from '@azure/msal-browser';
 
 const Auth = () => {
     const { userInfo, isLoading, isAuthenticated, msalInstance } = useAuth();
