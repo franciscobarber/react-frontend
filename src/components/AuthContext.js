@@ -51,7 +51,7 @@ const backendApiRequest = {
   scopes: [process.env.REACT_APP_BACKEND_API_SCOPE || 'api://YOUR_BACKEND_APP_ID_GUID/access_as_user'],
 };
 
-const msalInstance = new PublicClientApplication(msalConfig);
+export const msalInstance = new PublicClientApplication(msalConfig);
 
 export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
