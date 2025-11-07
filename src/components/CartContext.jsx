@@ -32,7 +32,7 @@ export function CartProvider({ children }) {
             console.error("Failed to fetch cart:", error);
             // Handle error appropriately in a real app
         }
-    }, [cartId, fetchCart]);
+    }, [cartId]);
 
     useEffect(() => {
         refreshCart();
