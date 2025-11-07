@@ -12,7 +12,7 @@ const Auth = () => {
         try {
             // Request 'openid', 'profile', 'email' for basic user info, and your backend API scope
             await msalInstance.loginRedirect({
-                scopes: ['openid', 'profile', 'email', process.env.REACT_APP_BACKEND_API_SCOPE || 'api://b69de00c-51fd-4ec7-a425-524f4728c42d/access_as_user'],
+                scopes: ['openid', 'profile', 'email', process.env.REACT_APP_BACKEND_API_SCOPE || 'api://b69de00c-51fd-4ec7-a425-524f4728c42d/access_as_user'], // This scope should point to your backend API
             });
         } catch (error) {
             console.error("MSAL login failed:", error);
