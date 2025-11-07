@@ -1,12 +1,26 @@
 const API_URL = process.env.REACT_APP_API_URL || '';
 
 // A helper function to handle fetch responses
-async function handleResponse(response) {
+async function handleResponse(response, isJson = true) {
   if (!response.ok) {
     const error = await response.text();
     throw new Error(`HTTP error! status: ${response.status}, message: ${error}`);
   }
-  return response.json();
+  if (isJson) {
+    return response.json();
+  }
+  return response;
+}
+
+// A helper function to create authenticated headers
+function getAuthHeaders(idToken) {
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  if (idToken) {
+    headers['Authorization'] = `Bearer ${idToken}`;
+  }
+  return headers;
 }
 
 export async function getProducts() {
@@ -29,9 +43,13 @@ export async function addToCart(item, cartId) {
   return handleResponse(response);
 }
 
-export async function createOrder(order) {
+export async function createOrder(order, idToken) {
   // This endpoint doesn't exist yet on the backend, this is a placeholder
-  console.log("Creating order:", order);
-  // In a real implementation, you would make a POST request here.
-  return Promise.resolve({ id: 'new-order-123', ...order });
+  console.log("Sending order to backend:", order);
+  const response = await fetch(`${API_URL}/api/orders`, {
+    method: 'POST',
+    headers: getAuthHeaders(idToken),
+    body: JSON.stringify(order),
+  });
+  return handleResponse(response);
 }
