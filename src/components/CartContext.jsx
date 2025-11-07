@@ -27,6 +27,7 @@ export function CartProvider({ children }) {
             // If the API returns an object like { items: [...] } for a cart, extract the array.
             // If it returns an empty object {} for an empty cart, default to an empty array.
             const itemsArray = Array.isArray(items) ? items : (items && items.items) || [];
+            console.log("Cart items:", itemsArray);
             setCartItems(itemsArray);
         } catch (error) {
             console.error("Failed to fetch cart:", error);
