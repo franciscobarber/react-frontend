@@ -1,29 +1,120 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import { PublicClientApplication, InteractionRequiredAuthError, LogLevel } from '@azure/msal-browser';
 
 const AuthContext = createContext(null);
+
+// --- MSAL Configuration ---
+// Replace with your Azure AD App Registration details
+// It's highly recommended to use environment variables for these values.
+const msalConfig = {
+  auth: {
+    clientId: process.env.REACT_APP_AAD_CLIENT_ID || 'c64edf5c-72df-4ff4-9d4b-88549224197b', // Application (client) ID of your frontend app registration in Azure AD
+    authority: process.env.REACT_APP_AAD_AUTHORITY || 'https://login.microsoftonline.com/287a4f88-5da5-453c-a374-03270aeb9896', // e.g., 'https://login.microsoftonline.com/common' or 'https://login.microsoftonline.com/YOUR_TENANT_ID'
+    redirectUri: window.location.origin, // Your frontend's redirect URI (e.g., http://localhost:3000)
+  },
+  cache: {
+    cacheLocation: "localStorage", // This configures where your cache will be stored
+    storeAuthStateInCookie: false, // Set to true if you are having issues on IE11 or Edge
+  },
+  system: {
+    loggerOptions: {
+      loggerCallback: (level, message, containsPii) => {
+        if (containsPii) {
+          return; // Do not log PII to console
+        }
+        switch (level) {
+          case LogLevel.Error:
+            console.error("MSAL Error:", message);
+            return;
+          case LogLevel.Info:
+            console.info("MSAL Info:", message);
+            return;
+          case LogLevel.Verbose:
+            console.debug("MSAL Verbose:", message);
+            return;
+          case LogLevel.Warning:
+            console.warn("MSAL Warning:", message);
+            return;
+          default:
+            return;
+        }
+      },
+      piiLoggingEnabled: false, // Set to true for debugging, but be cautious in production
+      logLevel: LogLevel.Info,
+    }
+  }
+};
+
+// Scopes for your backend API - REPLACE WITH YOUR BACKEND API'S EXPOSED SCOPES
+// This is the Application ID URI of your backend API, followed by the scope name.
+const backendApiRequest = {
+  scopes: [process.env.REACT_APP_BACKEND_API_SCOPE || 'api://YOUR_BACKEND_APP_ID_GUID/access_as_user'],
+};
+
+const msalInstance = new PublicClientApplication(msalConfig);
 
 export const AuthProvider = ({ children }) => {
   const [userInfo, setUserInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [backendAccessToken, setBackendAccessToken] = useState(null); // This will hold the AAD token for your backend
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Overall authentication status
 
   useEffect(() => {
-    async function fetchUserInfo() {
+    async function initializeAuth() {
       try {
+        // 1. Handle MSAL redirect (if any) - important for redirect flows
+        await msalInstance.handleRedirectPromise();
+
+        // 2. Get SWA client principal (for general user info display, if SWA is still used for initial login)
         const response = await fetch('/.auth/me');
         if (response.ok) {
           const { clientPrincipal } = await response.json();
           setUserInfo(clientPrincipal);
+          setIsAuthenticated(true); // User is authenticated via SWA
+
+          // 3. Acquire AAD access token for backend using MSAL
+          // Try to get an account from MSAL cache. Assuming the user has logged in via MSAL.
+          const accounts = msalInstance.getAllAccounts();
+          if (accounts.length > 0) {
+            try {
+              const tokenResponse = await msalInstance.acquireTokenSilent({
+                ...backendApiRequest,
+                account: accounts[0], // Use the first available account
+              });
+              setBackendAccessToken(tokenResponse.accessToken);
+            } catch (error) {
+              if (error instanceof InteractionRequiredAuthError) {
+                console.warn("Interaction required to acquire backend token silently. User might need to re-authenticate.");
+                // This means the silent token acquisition failed (e.g., token expired, consent needed).
+                // The user will be prompted on the next interactive login attempt.
+              } else {
+                console.error("Error acquiring backend access token silently:", error);
+              }
+            }
+          } else {
+            console.log("No MSAL account found. User needs to log in via MSAL for backend access.");
+            // If SWA is logged in but MSAL isn't, this indicates a mismatch or first-time MSAL use.
+            // The user will need to use the MSAL login button.
+          }
+        } else {
+          // User is not logged in via SWA
+          setUserInfo(null);
+          setIsAuthenticated(false);
+          setBackendAccessToken(null);
         }
       } catch (error) {
-        console.error('Error fetching user info:', error);
+        console.error('Error during authentication initialization:', error);
       } finally {
         setIsLoading(false);
       }
     }
-    fetchUserInfo();
+    initializeAuth();
   }, []);
 
-  return <AuthContext.Provider value={{ userInfo, isLoading }}>{children}</AuthContext.Provider>;
+  // Expose MSAL instance for interactive login/logout in Auth.js
+  const authValue = { userInfo, isLoading, backendAccessToken, isAuthenticated, msalInstance };
+
+  return <AuthContext.Provider value={authValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
