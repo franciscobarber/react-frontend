@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { PublicClientApplication, InteractionRequiredAuthError, LogLevel, EventType } from '@azure/msal-browser';
+import { PublicClientApplication, InteractionRequiredAuthError, LogLevel } from '@azure/msal-browser';
 
 const AuthContext = createContext(null);
 
