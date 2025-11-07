@@ -46,7 +46,7 @@ export async function addToCart(item, cartId) {
 export async function createOrder(order, idToken) {
   // This endpoint doesn't exist yet on the backend, this is a placeholder
   console.log("Sending order to backend:", order);
-  const response = await fetch(`${API_URL}/api/orders`, {
+  const response = await fetch(`${API_URL}/api/order`, {
     method: 'POST',
     headers: getAuthHeaders(idToken),
     body: JSON.stringify(order),
