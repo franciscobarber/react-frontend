@@ -9,7 +9,7 @@ const AuthContext = createContext(null);
 const msalConfig = {
   auth: {
     clientId: process.env.REACT_APP_AAD_CLIENT_ID || '500400f3-0551-468b-b59c-1bddd6e055b1', // **VERIFY THIS ID EXISTS IN AZURE AD PORTAL**
-    authority: process.env.REACT_APP_AAD_AUTHORITY || 'https://login.microsoftonline.com/287a4f88-5da5-453c-a374-03270aeb9896', // e.g., 'https://login.microsoftonline.com/common' or 'https://login.microsoftonline.com/YOUR_TENANT_ID'
+    authority: process.env.REACT_APP_AAD_AUTHORITY || 'https://login.microsoftonline.com/organizations', // Use 'organizations' for multi-tenant work/school accounts
     redirectUri: window.location.origin, // Your frontend's redirect URI (e.g., http://localhost:3000)
   },
   cache: {
