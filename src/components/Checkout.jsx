@@ -5,7 +5,7 @@ import { useAuth } from './AuthContext';
 import { createOrder } from '../services/apiClient';
 
 export default function Checkout() {
-  const { cartItems, refreshCart } = useCart();
+  const { cartItems, refreshCart, cartId } = useCart();
   const { backendAccessToken, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
@@ -25,7 +25,7 @@ export default function Checkout() {
     try {
       const newOrder = await createOrder(order, backendAccessToken);
       alert(`Order created successfully! Order ID: ${newOrder.id}`);
-      await refreshCart(); // Re-fetch the cart, which is now empty
+      await refreshCart(cartId); // Re-fetch the cart, which is now empty
       navigate('/'); // Redirect to the homepage
     } catch (error) {
       console.error('Failed to create order:', error);

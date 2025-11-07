@@ -20,9 +20,10 @@ export function CartProvider({ children }) {
     const [cartItems, setCartItems] = useState([]);
     const [cartId] = useState(getCartId());
 
-    const refreshCart = useCallback(async () => {
+    const refreshCart = useCallback(async (id) => {
+        const cartToFetch = id || cartId;
         try {
-            const items = await fetchCart(cartId);
+            const items = await fetchCart(cartToFetch);
             // Ensure cartItems is always an array.
             // If the API returns an object like { items: [...] } for a cart, extract the array.
             // If it returns an empty object {} for an empty cart, default to an empty array.
@@ -44,7 +45,7 @@ export function CartProvider({ children }) {
         await refreshCart(); // Re-fetch the cart to update the state
     };
 
-    const value = { cartItems, addToCart, refreshCart };
+    const value = { cartItems, addToCart, refreshCart, cartId };
 
     return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }
