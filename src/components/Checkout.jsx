@@ -16,7 +16,8 @@ export default function Checkout() {
     }
 
     const order = {
-      items: cartItems.map(item => ({
+      cartId: cartId, // Pass the cartId to the backend
+      orderItems: cartItems.map(item => ({
         productId: item.productId,
         quantity: item.quantity,
       })),
