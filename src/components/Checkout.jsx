@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from './CartContext';
 import { useAuth } from './AuthContext';
 import { createOrder } from '../services/apiClient';
 
 export default function Checkout() {
-  const { cartItems } = useCart();
+  const { cartItems, refreshCart } = useCart();
   const { backendAccessToken, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
   const handleCheckout = async () => {
     if (!isAuthenticated || !backendAccessToken) {
@@ -23,7 +25,8 @@ export default function Checkout() {
     try {
       const newOrder = await createOrder(order, backendAccessToken);
       alert(`Order created successfully! Order ID: ${newOrder.id}`);
-      // Optionally, you can clear the cart here
+      await refreshCart(); // Re-fetch the cart, which is now empty
+      navigate('/'); // Redirect to the homepage
     } catch (error) {
       console.error('Failed to create order:', error);
       alert('There was an issue placing your order. Please try again.');
