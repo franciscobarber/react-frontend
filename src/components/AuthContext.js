@@ -48,7 +48,7 @@ const msalConfig = {
 // Scopes for your backend API - REPLACE WITH YOUR BACKEND API'S EXPOSED SCOPES
 // This is the Application ID URI of your backend API, followed by the scope name.
 const backendApiRequest = {
-  scopes: [process.env.REACT_APP_BACKEND_API_SCOPE || 'api://dc68bb1b-4136-45f5-95ea-e1bd6819df2b/access_as_user'],
+  scopes: [process.env.REACT_APP_BACKEND_API_SCOPE || 'api://b69de00c-51fd-4ec7-a425-524f4728c42d/access_as_user'],
 };
 
 export const msalInstance = new PublicClientApplication(msalConfig);
