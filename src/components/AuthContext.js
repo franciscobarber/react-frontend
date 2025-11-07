@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
-import { PublicClientApplication, InteractionRequiredAuthError, LogLevel } from '@azure/msal-browser';
+import { PublicClientApplication, InteractionRequiredAuthError, LogLevel, EventType } from '@azure/msal-browser';
 
 const AuthContext = createContext(null);
 
@@ -59,6 +59,33 @@ export const AuthProvider = ({ children }) => {
   const [backendAccessToken, setBackendAccessToken] = useState(null); // This will hold the AAD token for your backend
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Overall authentication status
 
+  // This effect will run once on mount and set up the event callback
+  useEffect(() => {
+    const callbackId = msalInstance.addEventCallback(async (event) => {
+      if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
+        const account = event.payload.account;
+        msalInstance.setActiveAccount(account);
+
+        try {
+          const tokenResponse = await msalInstance.acquireTokenSilent({
+            ...backendApiRequest,
+            account: account,
+          });
+          setBackendAccessToken(tokenResponse.accessToken);
+          setIsAuthenticated(true);
+          // The userInfo from SWA might be stale or not what we want for display.
+          // Let's create a user object from the MSAL account info.
+          setUserInfo({ userDetails: account.name || account.username });
+        } catch (error) {
+          console.error("Error acquiring token after login:", error);
+          // Handle token acquisition failure, e.g., by initiating an interactive request
+        }
+      }
+    });
+
+    return () => msalInstance.removeEventCallback(callbackId);
+  }, []);
+
   useEffect(() => {
     async function initializeAuth() {
       try {
@@ -66,38 +93,27 @@ export const AuthProvider = ({ children }) => {
         await msalInstance.handleRedirectPromise();
 
         // 2. Get SWA client principal (for general user info display, if SWA is still used for initial login)
-        const response = await fetch('/.auth/me');
-        if (response.ok) {
-          const { clientPrincipal } = await response.json();
-          setUserInfo(clientPrincipal);
-          setIsAuthenticated(true); // User is authenticated via SWA
-
-          // 3. Acquire AAD access token for backend using MSAL
-          // Try to get an account from MSAL cache. Assuming the user has logged in via MSAL.
-          const accounts = msalInstance.getAllAccounts();
-          if (accounts.length > 0) {
-            try {
-              const tokenResponse = await msalInstance.acquireTokenSilent({
-                ...backendApiRequest,
-                account: accounts[0], // Use the first available account
-              });
-              setBackendAccessToken(tokenResponse.accessToken);
-            } catch (error) {
-              if (error instanceof InteractionRequiredAuthError) {
-                console.warn("Interaction required to acquire backend token silently. User might need to re-authenticate.");
-                // This means the silent token acquisition failed (e.g., token expired, consent needed).
-                // The user will be prompted on the next interactive login attempt.
-              } else {
-                console.error("Error acquiring backend access token silently:", error);
-              }
+        const accounts = msalInstance.getAllAccounts();
+        if (accounts.length > 0) {
+          msalInstance.setActiveAccount(accounts[0]);
+          setIsAuthenticated(true);
+          setUserInfo({ userDetails: accounts[0].name || accounts[0].username });
+          try {
+            const tokenResponse = await msalInstance.acquireTokenSilent({
+              ...backendApiRequest,
+              account: accounts[0],
+            });
+            setBackendAccessToken(tokenResponse.accessToken);
+          } catch (error) {
+            if (error instanceof InteractionRequiredAuthError) {
+              console.warn("Silent token acquisition failed. User interaction is required.");
+              // Optionally, you could trigger msalInstance.loginRedirect(backendApiRequest) here
+            } else {
+              console.error("Error acquiring token silently on page load:", error);
             }
-          } else {
-            console.log("No MSAL account found. User needs to log in via MSAL for backend access.");
-            // If SWA is logged in but MSAL isn't, this indicates a mismatch or first-time MSAL use.
-            // The user will need to use the MSAL login button.
           }
         } else {
-          // User is not logged in via SWA
+          // No accounts are signed in
           setUserInfo(null);
           setIsAuthenticated(false);
           setBackendAccessToken(null);
