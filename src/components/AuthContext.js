@@ -48,7 +48,7 @@ const msalConfig = {
 // Scopes for your backend API - REPLACE WITH YOUR BACKEND API'S EXPOSED SCOPES
 // This is the Application ID URI of your backend API, followed by the scope name.
 const backendApiRequest = {
-  scopes: [process.env.REACT_APP_BACKEND_API_SCOPE || 'api://b69de00c-51fd-4ec7-a425-524f4728c42d/access_as_user'],
+  scopes: [process.env.REACT_APP_BACKEND_API_SCOPE || 'api://b69de00c-51fd-4ec7-a425-524f4728c42d/access_as_user']
 };
 
 export const msalInstance = new PublicClientApplication(msalConfig);
@@ -63,6 +63,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const callbackId = msalInstance.addEventCallback(async (event) => {
       if (event.eventType === EventType.LOGIN_SUCCESS && event.payload.account) {
+        console.log("MSAL LOGIN_SUCCESS event received.");
         const account = event.payload.account;
         msalInstance.setActiveAccount(account);
 
@@ -71,6 +72,7 @@ export const AuthProvider = ({ children }) => {
             ...backendApiRequest,
             account: account,
           });
+          console.log("Backend access token acquired after LOGIN_SUCCESS.");
           setBackendAccessToken(tokenResponse.accessToken);
           setIsAuthenticated(true);
           // The userInfo from SWA might be stale or not what we want for display.
@@ -91,6 +93,7 @@ export const AuthProvider = ({ children }) => {
       try {
         // 1. Handle MSAL redirect (if any) - important for redirect flows
         await msalInstance.handleRedirectPromise();
+        console.log("MSAL handleRedirectPromise completed.");
 
         // 2. Get SWA client principal (for general user info display, if SWA is still used for initial login)
         const accounts = msalInstance.getAllAccounts();
@@ -98,6 +101,7 @@ export const AuthProvider = ({ children }) => {
           msalInstance.setActiveAccount(accounts[0]);
           setIsAuthenticated(true);
           setUserInfo({ userDetails: accounts[0].name || accounts[0].username });
+          console.log("Accounts found after redirect. User authenticated:", accounts[0].name || accounts[0].username);
           try {
             const tokenResponse = await msalInstance.acquireTokenSilent({
               ...backendApiRequest,
@@ -113,6 +117,7 @@ export const AuthProvider = ({ children }) => {
             }
           }
         } else {
+          console.log("No MSAL accounts found after redirect processing.");
           // No accounts are signed in
           setUserInfo(null);
           setIsAuthenticated(false);
@@ -121,6 +126,7 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         console.error('Error during authentication initialization:', error);
       } finally {
+        console.log("Auth initialization finished. isAuthenticated:", isAuthenticated);
         setIsLoading(false);
       }
     }
