@@ -13,12 +13,12 @@ async function handleResponse(response, isJson = true) {
 }
 
 // A helper function to create authenticated headers
-function getAuthHeaders(idToken) {
+function getAuthHeaders(accessToken) {
   const headers = {
     'Content-Type': 'application/json',
   };
-  if (idToken) {
-    headers['Authorization'] = `Bearer ${idToken}`;
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
   }
   return headers;
 }
@@ -43,12 +43,12 @@ export async function addToCart(item, cartId) {
   return handleResponse(response);
 }
 
-export async function createOrder(order, idToken) {
+export async function createOrder(order, accessToken) {
   // This endpoint doesn't exist yet on the backend, this is a placeholder
   console.log("Sending order to backend:", order);
   const response = await fetch(`${API_URL}/api/order`, { // Confirming this is the correct endpoint as per OrderController.cs
     method: 'POST',
-    headers: getAuthHeaders(idToken),
+    headers: getAuthHeaders(accessToken),
     body: JSON.stringify(order),
   });
   return handleResponse(response);
