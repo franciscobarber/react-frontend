@@ -23,6 +23,7 @@ export function CartProvider({ children }) {
     const refreshCart = useCallback(async (id) => {
         const cartToFetch = id || cartId;
         try {
+            console.log(cartToFetch)
             const items = await fetchCart(cartToFetch);
             // Ensure cartItems is always an array.
             // If the API returns an object like { items: [...] } for a cart, extract the array.
